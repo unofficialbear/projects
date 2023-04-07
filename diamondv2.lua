@@ -1,3 +1,64 @@
+local abbreviations  = {
+	"K", -- 4 digits 
+	"M", -- 7 eigits
+	"B", -- 10 digits
+	"T", -- 13 digits
+	"Q", -- 16 digits
+	"Qi", -- 19 digits
+	"S", -- 22 digits
+	"Sx", -- 25 digits
+	"Sp", -- 25 digits
+	"Oc", -- 28 digits
+	"N", -- 31 digits
+	"De", -- 34 digits
+	"Un", -- 37 digits
+	"Tr", -- 40 digits
+}
+
+local maxValue = 1000
+
+function Abbreviate(value)
+	local cut = maxValue
+	if value  < cut then
+		return value 
+	else
+		local inStr = tostring(math.floor(value ))
+		if inStr:lower() == "inf" or inStr:find("nan") then
+			return inStr
+		end
+		local length, str
+		local isExp, strEnd = inStr:find("e%+")
+		if isExp then
+			length = inStr:sub(strEnd + 1) + 1
+			str = tostring(inStr:sub(1, isExp - 1) * 100):sub(1, 3)
+		else
+			length = #inStr
+			str = inStr:sub(1, 3)
+		end
+		local div, rem = math.floor(length / 3), length % 3
+		if rem == 0 then
+			div = div - 1
+		end
+		if div > #abbreviations  then
+			print("div", div, "greater than suff", #abbreviations )
+			str = inStr
+		else
+			if rem == 1 then
+				str = tostring(tonumber(str) / 100)
+			elseif rem == 2 then
+				str = tostring(tonumber(str) / 10)
+			end
+			local suff = abbreviations [div]
+			if suff == "O" then
+				str = str .. " " .. suff
+			else
+				str = str .. suff
+			end
+		end
+		return str
+	end
+end
+
 -- Gui to Lua
 -- Version: 3.2
 
@@ -162,7 +223,7 @@ local function DUYEJPG_fake_script() -- Diamondtracker.v2
 	
 	while wait() do
 		diamonds = game:GetService('Players').LocalPlayer.leaderstats.Diamonds.Value
-		script.Parent.GUI.diamonds.Text = diamonds - olddiamonds
+		script.Parent.GUI.diamonds.Text = Abbreviate(diamonds - olddiamonds)
 	end
 end
 coroutine.wrap(DUYEJPG_fake_script)()
